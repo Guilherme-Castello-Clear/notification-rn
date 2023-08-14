@@ -92,7 +92,7 @@ export default function App(){
       timestamp: date.getTime()
     }
     console.log(date.getTime())
-    await notifee.createTriggerNotification({
+    const notification = await notifee.createTriggerNotification({
       title: "Lembrete Estudo",
       body: "Estudar JavaScript as 15:30",
       android:{
@@ -105,6 +105,14 @@ export default function App(){
     }, trigger)
   }
 
+  function handleListNotifications(){
+    notifee.getTriggerNotificationIds().then((ids) => console.log(ids))
+  }
+
+  async function handleCancelNotification(){
+    await notifee.cancelNotification("3JUON7YoYHe73zpb6dCk")
+    console.log("Notificação cancelada com sucesso!")
+  }
 
   return (
     <View>
@@ -116,6 +124,14 @@ export default function App(){
       <Button
         title="Agendar notificação"
         onPress={handleScheduleNotification}
+      />
+      <Button
+        title="Listar notificação"
+        onPress={handleListNotifications}
+      />
+      <Button
+        title="Cancelar notificação"
+        onPress={handleCancelNotification}
       />
     </View>
   );
