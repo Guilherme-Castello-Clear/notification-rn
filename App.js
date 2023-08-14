@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 
-import notifee, {AndroidImportance, AuthorizationStatus, EventType} from '@notifee/react-native'
+import notifee, {AndroidImportance, AuthorizationStatus, EventType, TriggerType} from '@notifee/react-native'
 
 export default function App(){
 
@@ -31,6 +31,16 @@ export default function App(){
     getPermission();
   }, [])
 
+  notifee.onBackgroundEvent(async ({ type, detail}) => {
+    const { notification, pressAction } = detail;
+    if(type === EventType.PRESS){
+      console.log("Notificação Background: ", pressAction?.id)
+      if(notification?.id){
+        await notifee.cancelNotification(notification?.id)
+      }
+    }
+  })
+
   useEffect(() => {
     return notifee.onForegroundEvent(({type, detail}) => {
       switch(type){
@@ -43,6 +53,8 @@ export default function App(){
       }
     })
   }, [])
+
+
 
   async function handleNotificate(){
 
@@ -69,12 +81,41 @@ export default function App(){
     })
   }
 
+  async function handleScheduleNotification(){
+    const date = new Date(Date.now());
+
+    console.log(date.getTime())
+    date.setSeconds(date.getSeconds() + 10);
+
+    const trigger = {
+      type: TriggerType.TIMESTAMP,
+      timestamp: date.getTime()
+    }
+    console.log(date.getTime())
+    await notifee.createTriggerNotification({
+      title: "Lembrete Estudo",
+      body: "Estudar JavaScript as 15:30",
+      android:{
+        channelId: 'lembrete',
+        importance: AndroidImportance.HIGH,
+        pressAction: {
+          id: 'default',
+        }
+      }
+    }, trigger)
+  }
+
+
   return (
     <View>
       <Text>Notifee instalado.</Text>
       <Button
         title="Notificação"
         onPress={handleNotificate}
+      />
+      <Button
+        title="Agendar notificação"
+        onPress={handleScheduleNotification}
       />
     </View>
   );
